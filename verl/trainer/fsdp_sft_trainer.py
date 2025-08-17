@@ -20,7 +20,7 @@ TODO(zhangchi.usc1992)
 
 import os
 
-os.environ["NCCL_DEBUG"] = "WARN"
+os.environ["NCCL_DEBUG"] = "DEBUG"
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
 
 import logging
@@ -132,6 +132,7 @@ class FSDPSFTTrainer:
 
         if self.device_mesh.get_rank() == 0:
             print(self.config)
+        print("debug")
         self.device_name = self.config.trainer.device
 
     def _normalize_config_bsz(self):
