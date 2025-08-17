@@ -80,6 +80,7 @@ elif is_npu_available:
 
 logger = logging.getLogger(__file__)
 logger.setLevel(os.getenv("VERL_SFT_LOGGING_LEVEL", "WARN"))
+print("VERL_SFT_LOGGING_LEVEL: %s" % os.getenv("VERL_SFT_LOGGING_LEVEL", "WARN"))
 
 
 def extract_step(path):
@@ -128,11 +129,13 @@ class FSDPSFTTrainer:
         # Initialize checkpoint manager
         self._init_checkpoint_manager()
 
+        print("loading checkpoint ..")
         self.load_checkpoint()
+        print("loaded.")
 
         if self.device_mesh.get_rank() == 0:
             print(self.config)
-        print("debug")
+
         self.device_name = self.config.trainer.device
 
     def _normalize_config_bsz(self):
