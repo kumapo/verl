@@ -315,6 +315,7 @@ class FSDPSFTTrainer:
             apply_fsdp2(self.model, fsdp_kwargs, self.config.model.fsdp_config)
             print(f"rank{self.device_mesh.get_rank()} is loading full states..")
             fsdp2_load_full_state_dict(self.model, full_state, self.device_mesh, cpu_offload)
+            print(f"rank{self.device_mesh.get_rank()} loaded.")
             self.fsdp_model = self.model
         else:
             raise NotImplementedError(f"not implement {fsdp_strategy}")
