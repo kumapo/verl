@@ -459,6 +459,7 @@ def fsdp2_load_full_state_dict(model: torch.nn.Module, full_state: dict, device_
         model = model.to(device=get_device_id(), non_blocking=True)
     else:
         model = model.to_empty(device=get_device_id())
+    print(f"rank{dist.get_rank()} loaded full states with fsdp2.")
 
     cpu_offload = cpu_offload is not None
     options = StateDictOptions(full_state_dict=True, cpu_offload=cpu_offload, broadcast_from_rank0=True)

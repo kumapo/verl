@@ -285,7 +285,7 @@ class FSDPSFTTrainer:
 
         fsdp_strategy = self.config.model.strategy
         if fsdp_strategy == "fsdp":
-            print(f"rank{self.device_mesh.get_rank()} is loading full states..")
+            print(f"rank{self.device_mesh.get_rank()} is loading full states with fsdp1.")
             self.fsdp_model = FSDP(
                 self.model,
                 cpu_offload=cpu_offload,
@@ -313,7 +313,7 @@ class FSDPSFTTrainer:
             }
             full_state = self.model.state_dict()
             apply_fsdp2(self.model, fsdp_kwargs, self.config.model.fsdp_config)
-            print(f"rank{self.device_mesh.get_rank()} is loading full states..")
+            print(f"rank{self.device_mesh.get_rank()} is loading full states with fsdp2.")
             fsdp2_load_full_state_dict(self.model, full_state, self.device_mesh, cpu_offload)
             self.fsdp_model = self.model
         else:
