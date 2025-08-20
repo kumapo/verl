@@ -238,7 +238,8 @@ class FSDPSFTTrainer:
                 attn_implementation="flash_attention_2",
                 trust_remote_code=trust_remote_code,
             )
-
+            if self.device_mesh.get_rank() == 0:
+                print("from_pretrained done")
             if self.use_remove_padding or self.config.ulysses_sequence_parallel_size > 1:
                 from verl.models.transformers.monkey_patch import apply_monkey_patch
 
