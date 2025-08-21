@@ -90,6 +90,9 @@ class MultiTurnSFTDataset(Dataset):
             dataframes.append(dataframe)
         self.dataframe = pd.concat(dataframes)
 
+        print("files: %s" % self.parquet_files)
+        print(self.dataframe.head())
+        print("columns: %s" % self.dataframe.columns)
         # Extract messages list from dataframe
         self.messages = self.dataframe[self.messages_key].apply(series_to_item).tolist()
 

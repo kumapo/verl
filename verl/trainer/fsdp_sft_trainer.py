@@ -263,7 +263,11 @@ class FSDPSFTTrainer:
                 }
                 self.model = get_peft_model(self.model, LoraConfig(**lora_config))
                 self.model = self.model.to(torch_dtype)
+                if self.device_mesh.get_rank() == 0:
+                    print("model.to done")
 
+        if self.device_mesh.get_rank() == 0:
+            print("init_context done")
         if self.config.model.enable_gradient_checkpointing:
             self.model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
 
