@@ -234,7 +234,9 @@ class FSDPSFTTrainer:
                 attn_implementation="flash_attention_2",
                 trust_remote_code=trust_remote_code,
             )
-
+            if self.device_mesh.get_rank() == 0:
+                print("from_pretrained done")
+        
             if self.use_remove_padding or self.config.ulysses_sequence_parallel_size > 1:
                 from verl.models.transformers.monkey_patch import apply_monkey_patch
 
@@ -248,6 +250,9 @@ class FSDPSFTTrainer:
 
             if self.config.model.get("lora_rank", 0) > 0:
                 self.model.enable_input_require_grads()
+                if self.device_mesh.get_rank() == 0:
+                    print("enable_input_require_grads done")
+
                 # Convert config to regular Python types before creating PEFT model
                 lora_config = {
                     "task_type": TaskType.CAUSAL_LM,
@@ -257,7 +262,12 @@ class FSDPSFTTrainer:
                     "bias": "none",
                 }
                 self.model = get_peft_model(self.model, LoraConfig(**lora_config))
+                if self.device_mesh.get_rank() == 0:
+                    print("get_peft_model done")
+
                 self.model = self.model.to(torch_dtype)
+                if self.device_mesh.get_rank() == 0:
+                    print("model.to done")
 
         if self.config.model.enable_gradient_checkpointing:
             self.model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
@@ -283,6 +293,8 @@ class FSDPSFTTrainer:
 
         fsdp_strategy = self.config.model.strategy
         if fsdp_strategy == "fsdp":
+            print(f"rank{self.device_mesh.get_rank()} is applying fsdp1.")
+
             self.fsdp_model = FSDP(
                 self.model,
                 cpu_offload=cpu_offload,
@@ -302,6 +314,7 @@ class FSDPSFTTrainer:
                 param_dtype=torch.bfloat16, reduce_dtype=torch.float32, cast_forward_inputs=True
             )
 
+            print(f"rank{self.device_mesh.get_rank()} is applying fsdp2.")
             fsdp_kwargs = {
                 "mesh": self.device_mesh,
                 "mp_policy": mp_policy,
@@ -310,10 +323,12 @@ class FSDPSFTTrainer:
             }
             full_state = self.model.state_dict()
             apply_fsdp2(self.model, fsdp_kwargs, self.config.model.fsdp_config)
+            print(f"rank{self.device_mesh.get_rank()} is loading full states with fsdp2.")
             fsdp2_load_full_state_dict(self.model, full_state, self.device_mesh, cpu_offload)
             self.fsdp_model = self.model
         else:
             raise NotImplementedError(f"not implement {fsdp_strategy}")
+        print(f"rank{self.device_mesh.get_rank()} loaded.")
 
         log_gpu_memory_usage("After FSDP wrapping", logger=logger)
 
