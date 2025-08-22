@@ -257,6 +257,9 @@ class FSDPSFTTrainer:
 
             if self.config.model.get("lora_rank", 0) > 0:
                 self.model.enable_input_require_grads()
+                if self.device_mesh.get_rank() == 0:
+                    print("enable_input_require_grads done")
+
                 # Convert config to regular Python types before creating PEFT model
                 lora_config = {
                     "task_type": TaskType.CAUSAL_LM,
@@ -266,6 +269,9 @@ class FSDPSFTTrainer:
                     "bias": "none",
                 }
                 self.model = get_peft_model(self.model, LoraConfig(**lora_config))
+                if self.device_mesh.get_rank() == 0:
+                    print("get_peft_model done")
+
                 self.model = self.model.to(torch_dtype)
                 if self.device_mesh.get_rank() == 0:
                     print("model.to done")
