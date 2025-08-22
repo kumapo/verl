@@ -225,6 +225,8 @@ class FSDPSFTTrainer:
         init_context = get_init_weight_context_manager(
             use_meta_tensor=not config.tie_word_embeddings, mesh=self.device_mesh
         )
+        if self.device_mesh.get_rank() == 0:
+            print("init_context done")
 
         with init_context():
             self.model: PreTrainedModel = AutoModelForCausalLM.from_pretrained(
