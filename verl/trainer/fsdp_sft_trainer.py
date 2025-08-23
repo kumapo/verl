@@ -291,8 +291,8 @@ class FSDPSFTTrainer:
                 if self.device_mesh.get_rank() == 0:
                     print("get_peft_model done")
     
-                no_match = check_lora_dtypes(self.model, torch_dtype)
-                if no_match:
+                mismatched = check_lora_dtypes(self.model, torch_dtype)
+                if mismatched:
                     self.model = self.model.to(torch_dtype)
                     if self.device_mesh.get_rank() == 0:
                         print("model.to done")
