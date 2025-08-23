@@ -20,7 +20,7 @@ TODO(zhangchi.usc1992)
 
 import os
 
-os.environ["NCCL_DEBUG"] = "INFO"
+os.environ["NCCL_DEBUG"] = "TRACE"
 os.environ["NCCL_DEBUG_SUBSYS"] = "ALL"
 os.environ["NCCL_DEBUG_FILE"] = "/home/Competition2025/P06/P06U023/llm-bridge-sahara/train/logs/nccl-debug.log"
 os.environ["TOKENIZERS_PARALLELISM"] = "true"

@@ -29,6 +29,9 @@ from verl.trainer.ppo.reward import load_reward_manager
 from verl.utils.device import is_cuda_available
 from verl.utils.import_utils import load_extern_type
 
+os.environ["NCCL_DEBUG"] = "TRACE"
+os.environ["NCCL_DEBUG_SUBSYS"] = "ALL"
+os.environ["NCCL_DEBUG_FILE"] = "/home/Competition2025/P06/P06U023/llm-bridge-sahara/train/logs/nccl-debug.log"
 
 @hydra.main(config_path="config", config_name="ppo_trainer", version_base=None)
 def main(config):
