@@ -20,7 +20,7 @@ TODO(zhangchi.usc1992)
 
 import os
 
-os.environ["NCCL_DEBUG"] = "INFO"
+os.environ["NCCL_DEBUG"] = "TRACE"
 os.environ["NCCL_DEBUG_SUBSYS"] = "ALL"
 os.environ["NCCL_DEBUG_FILE"] = "/home/Competition2025/P06/P06U023/llm-bridge-sahara/train/logs/nccl-debug.log"
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
@@ -291,8 +291,8 @@ class FSDPSFTTrainer:
                 if self.device_mesh.get_rank() == 0:
                     print("get_peft_model done")
     
-                mismatched = check_lora_dtypes(self.model, torch_dtype)
-                if mismatched:
+                ok = check_lora_dtypes(self.model, torch_dtype, True)
+                if ok:
                     self.model = self.model.to(torch_dtype)
                     if self.device_mesh.get_rank() == 0:
                         print("model.to done")
