@@ -293,12 +293,12 @@ class FSDPSFTTrainer:
     
                 ok = check_lora_dtypes(self.model, torch_dtype, True)
                 if ok:
+                    if self.device_mesh.get_rank() == 0:
+                        print("model.to done with no execution")
+                else:
                     self.model = self.model.to(torch_dtype)
                     if self.device_mesh.get_rank() == 0:
                         print("model.to done")
-                else:
-                    if self.device_mesh.get_rank() == 0:
-                        print("model.to done with execution")
 
         if self.device_mesh.get_rank() == 0:
             print("init_context done")
