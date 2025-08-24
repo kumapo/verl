@@ -256,6 +256,25 @@ class FSDPSFTTrainer:
                     print("apply_liger done")
 
             if self.config.model.get("lora_rank", 0) > 0:
+                def check_lora_dtypes(model, expected_dtype, verbose=False):
+                    mismatched = []
+                    lora_count = 0
+                    
+                    for name, param in model.named_parameters():
+                        if "lora_" in name:  # LoRAパラメータのみ
+                            lora_count += 1
+                            if param.dtype != expected_dtype:
+                                mismatched.append((name, param.dtype))
+                                if verbose:
+                                    print(f"{name}: {param.dtype} (expected {expected_dtype})")
+                    
+                    if mismatched:
+                        print(f"NG: Found {len(mismatched)}/{lora_count} LoRA params with wrong dtype")
+                        return False
+                    else:
+                        print(f"OK: All {lora_count} LoRA parameters are {expected_dtype}")
+                        return True
+
                 self.model.enable_input_require_grads()
                 if self.device_mesh.get_rank() == 0:
                     print("enable_input_require_grads done")
@@ -268,13 +287,18 @@ class FSDPSFTTrainer:
                     "target_modules": convert_to_regular_types(self.config.model.target_modules),
                     "bias": "none",
                 }
-                self.model = get_peft_model(self.model, LoraConfig(**lora_config))
+                self.model = get_peft_model(self.model, LoraConfig(**lora_config), autocast_adapter_dtype=False)
                 if self.device_mesh.get_rank() == 0:
                     print("get_peft_model done")
-
-                self.model = self.model.to(torch_dtype)
-                if self.device_mesh.get_rank() == 0:
-                    print("model.to done")
+    
+                ok = check_lora_dtypes(self.model, torch_dtype, True)
+                if ok:
+                    if self.device_mesh.get_rank() == 0:
+                        print("model.to done with no execution")
+                else:
+                    self.model = self.model.to(torch_dtype)
+                    if self.device_mesh.get_rank() == 0:
+                        print("model.to done")
 
         if self.device_mesh.get_rank() == 0:
             print("init_context done")
